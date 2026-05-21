@@ -55,7 +55,7 @@ public final class StaticFileHandler implements HttpHandler {
         return;
       }
       byte[] bytes = Files.readAllBytes(requested);
-      ex.getResponseHeaders().set("Content-Type", contentType(urlPath));
+      ex.getResponseHeaders().set("Content-Type", contentType(requested.getFileName().toString()));
       // Disable caching during dev so wasm rebuilds + edits show up.
       ex.getResponseHeaders().set("Cache-Control", "no-store");
       ex.sendResponseHeaders(200, bytes.length);
@@ -65,9 +65,9 @@ public final class StaticFileHandler implements HttpHandler {
     }
   }
 
-  private static String contentType(String urlPath) {
-    int dot = urlPath.lastIndexOf('.');
-    String ext = dot < 0 ? "" : urlPath.substring(dot + 1).toLowerCase();
+  private static String contentType(String fileName) {
+    int dot = fileName.lastIndexOf('.');
+    String ext = dot < 0 ? "" : fileName.substring(dot + 1).toLowerCase();
     switch (ext) {
       case "html": return "text/html; charset=utf-8";
       case "js":   return "application/javascript; charset=utf-8";
