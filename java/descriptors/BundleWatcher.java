@@ -1,10 +1,12 @@
 package meridian.ui.descriptors;
 
+import com.sun.nio.file.SensitivityWatchEventModifier;
 import java.io.IOException;
 import java.nio.file.ClosedWatchServiceException;
 import java.nio.file.FileSystems;
 import java.nio.file.Path;
 import java.nio.file.StandardWatchEventKinds;
+import java.nio.file.WatchEvent;
 import java.nio.file.WatchKey;
 import java.nio.file.WatchService;
 import java.util.function.Consumer;
@@ -37,32 +39,51 @@ public final class BundleWatcher implements AutoCloseable {
   private volatile boolean closed = false;
 
   public BundleWatcher(Path bundlePath, Consumer<PanelBundle> listener) throws IOException {
-    this.bundlePath = bundlePath.toAbsolutePath();
+    // Resolve symlinks up-front. Bazel ships outputs in
+    // `bazel-out/.../bin/...` and exposes them through the
+    // `bazel-bin` workspace symlink — `WatchService` on macOS
+    // doesn't traverse symlinks reliably, so we watch the real path.
+    this.bundlePath = bundlePath.toRealPath();
     this.listener = listener;
     this.watcher = FileSystems.getDefault().newWatchService();
     Path dir = this.bundlePath.getParent();
     if (dir == null) {
       throw new IOException("Bundle path has no parent directory: " + bundlePath);
     }
+    // macOS's WatchService implementation is polling-based; the
+    // default sensitivity is 10s, which is unusable for a "save and
+    // see" dev loop. HIGH = 2s polling. The
+    // SensitivityWatchEventModifier API ships in `jdk.unsupported`
+    // but is stable across OpenJDK 17 / 21.
     dir.register(
         watcher,
-        StandardWatchEventKinds.ENTRY_CREATE,
-        StandardWatchEventKinds.ENTRY_MODIFY,
-        StandardWatchEventKinds.ENTRY_DELETE);
+        new WatchEvent.Kind<?>[] {
+          StandardWatchEventKinds.ENTRY_CREATE,
+          StandardWatchEventKinds.ENTRY_MODIFY,
+          StandardWatchEventKinds.ENTRY_DELETE,
+        },
+        SensitivityWatchEventModifier.HIGH);
     this.thread =
         new Thread(this::loop, "meridian-bundle-watcher:" + this.bundlePath.getFileName());
     this.thread.setDaemon(true);
   }
 
-  /** Parses the bundle once and starts the background watch thread. */
+  /**
+   * Parses the bundle once and starts the background watch thread.
+   * The listener is NOT invoked with the initial bundle — caller is
+   * responsible for using the returned value to set up initial state
+   * (often on a specific thread that's hard to dispatch to from here,
+   * e.g. JavaFX's Application thread). The listener fires on every
+   * subsequent change.
+   */
   public PanelBundle start() throws IOException {
     PanelBundle initial = BundleLoader.parse(bundlePath);
-    listener.accept(initial);
     thread.start();
     return initial;
   }
 
   private void loop() {
+    LOG.info("Watching " + bundlePath + " for changes (polling-based on macOS).");
     while (!closed) {
       WatchKey key;
       try {
@@ -73,17 +94,16 @@ public final class BundleWatcher implements AutoCloseable {
       } catch (ClosedWatchServiceException e) {
         return;
       }
-      boolean fileTouched =
-          key.pollEvents().stream()
-              .anyMatch(
-                  ev -> {
-                    Object ctx = ev.context();
-                    if (!(ctx instanceof Path)) {
-                      return false;
-                    }
-                    Path entry = (Path) ctx;
-                    return entry.getFileName().equals(bundlePath.getFileName());
-                  });
+      boolean fileTouched = false;
+      for (WatchEvent<?> ev : key.pollEvents()) {
+        Object ctx = ev.context();
+        if (!(ctx instanceof Path)) continue;
+        Path entry = (Path) ctx;
+        if (entry.getFileName().equals(bundlePath.getFileName())) {
+          fileTouched = true;
+          LOG.fine("Bundle event " + ev.kind().name() + " on " + entry);
+        }
+      }
       key.reset();
       if (fileTouched) {
         reload();
