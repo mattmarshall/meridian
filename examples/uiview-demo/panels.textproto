@@ -1,0 +1,58 @@
+# meridian.ui.v1.PanelBundle authored as textproto.
+#
+# Compiled to binpb by //examples/uiview-demo:panels (see BUILD.bazel)
+# and loaded by demo.js at startup. Edit this file, save, and the
+# runtime watch picks it up — no rebuild of the renderer needed for
+# pure-descriptor changes (column re-order, label edit, format flip).
+
+version: "demo-v1"
+
+panels {
+  panel_id: "claims"
+  title: "Claims"
+  table {
+    populate {
+      service: "pinax.claims.v1.ClaimsService"
+      method: "ListClaims"
+      bindings {
+        request_field: "pdf_path"
+        context: CURRENT_RESOURCE_PATH
+      }
+    }
+    rows_field: "claims"
+    item_noun: "claims"
+    placeholder: "No claims."
+    columns { header: "confidence" field_path: "confidence"   format: FLOAT_2DP    pref_width: 80 }
+    columns { header: "category"   field_path: "category"     format: STRING       pref_width: 100 }
+    columns { header: "claim"      field_path: "text"         format: STRING }
+    columns { header: "entities"   field_path: "entity_names" format: STRING_LIST  pref_width: 180 }
+  }
+}
+
+panels {
+  panel_id: "review_tickets"
+  title: "Review tickets"
+  table {
+    populate {
+      service: "pinax.review.v1.ReviewService"
+      method: "ListReviewTickets"
+      bindings {
+        request_field: "pdf_path"
+        context: CURRENT_RESOURCE_PATH
+      }
+    }
+    rows_field: "review_tickets"
+    item_noun: "tickets"
+    placeholder: "No tickets."
+    columns { header: "state"     field_path: "state"                     format: STRING pref_width: 80 }
+    columns { header: "ticket_id" field_path: "ticket_id"                 format: STRING pref_width: 180 }
+    columns { header: "rationale" field_path: "rationale"                 format: STRING pref_width: 260 }
+    columns { header: "subject"   field_path: "subject.claim.claim_text"  format: STRING }
+  }
+}
+
+panels {
+  panel_id: "sparql"
+  title: "SPARQL"
+  adhoc { handler_id: "sparql" }
+}

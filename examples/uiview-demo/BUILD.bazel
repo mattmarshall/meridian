@@ -1,0 +1,12 @@
+load("@meridian//bazel:panel_bundle.bzl", "meridian_panel_bundle")
+
+package(default_visibility = ["//visibility:public"])
+
+# Wire-encoded PanelBundle for the web demo. Compiled from
+# panels.textproto via protoc --encode; demo.js fetches the .binpb
+# at startup and decodes it with protobuf-js (no reflection).
+meridian_panel_bundle(
+    name = "panels",
+    src = "panels.textproto",
+    proto = "//proto:uiview_proto",
+)
