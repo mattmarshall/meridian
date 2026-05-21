@@ -1,14 +1,18 @@
 # Meridian
 
-Lightweight web component runtime. The TypeScript surface is a tiny
-toolkit — typed worker controller, DOM patch helpers, template loader,
-HTML escape, UI-kit CSS, and a proto-JSON message envelope — and the
-Bazel surface is a small rule set that captures the component graph
-declaratively and emits a JSON manifest of it.
+Multi-platform proto-driven UI framework + a TypeScript web-component
+runtime.
 
-It is not a framework. It is the substrate a few worker-backed
-components in [hrcrawl](https://github.com/mattmarshall/hrcrawl) and
-sibling projects share.
+| Surface | Purpose |
+|---|---|
+| [`proto/uiview.proto`](proto/uiview.proto) | Platform-neutral `PanelDescriptor` contract every renderer consumes. |
+| [`java/`](java/) | JavaFX renderer + descriptor-driven helpers (Pinax desktop UI today). |
+| [`rust/`](rust/) | `ratatui` TUI renderer + a Rust core that, via wasm-bindgen, also backs the TS web renderer. |
+| [`src/`](src/) | Lightweight TypeScript web-component toolkit (workers, DOM, proto-JSON) — predates the UI framework but is its rendering substrate. |
+
+The Java / Rust / TS renderers consume the same `PanelDescriptor`
+protos; adding a new platform is "write one renderer over the same
+contract."
 
 ## What's in it
 

@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Meridian uiview demo</title>
+  <style>
+    body { font-family: ui-sans-serif, system-ui, sans-serif; margin: 0; padding: 16px; color: #222; }
+    .tabs { display: flex; gap: 8px; border-bottom: 1px solid #ddd; margin-bottom: 16px; }
+    .tab { padding: 8px 12px; cursor: pointer; border-radius: 6px 6px 0 0; }
+    .tab.active { background: #eef; font-weight: 600; }
+    .meridian-uiview-header { font-weight: 600; font-size: 1.1em; padding: 4px 0; }
+    .meridian-uiview-meta { color: #666; font-size: 0.9em; padding: 2px 0 8px 0; }
+    .meridian-uiview-table { border-collapse: collapse; width: 100%; }
+    .meridian-uiview-table th, .meridian-uiview-table td { border: 1px solid #ddd; padding: 6px 10px; text-align: left; vertical-align: top; font-size: 13px; }
+    .meridian-uiview-table th { background: #fafafa; font-weight: 600; }
+    .meridian-uiview-placeholder { color: #999; font-style: italic; }
+    .meridian-uiview-body { padding: 8px; color: #999; font-style: italic; }
+  </style>
+</head>
+<body>
+  <h1>Meridian uiview — web renderer demo</h1>
+  <p>The descriptors and renderer here are identical to what the JavaFX and TUI hosts consume. Mock RPC data lives in <code>demo.js</code>.</p>
+  <div class="tabs" id="tabs"></div>
+  <div id="panel"></div>
+  <script type="module" src="./demo.js"></script>
+</body>
+</html>
