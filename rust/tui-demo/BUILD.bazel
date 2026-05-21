@@ -1,0 +1,20 @@
+load("@rules_rust//rust:defs.bzl", "rust_binary")
+
+package(default_visibility = ["//visibility:public"])
+
+exports_files(["Cargo.toml"])
+
+# Run with: bazel run //rust/tui-demo:tui-demo
+rust_binary(
+    name = "tui-demo",
+    srcs = ["src/main.rs"],
+    crate_name = "meridian_tui_demo",
+    edition = "2021",
+    deps = [
+        "//rust/tui",
+        "//rust/uiview",
+        "@crates//:crossterm",
+        "@crates//:ratatui",
+        "@crates//:serde_json",
+    ],
+)

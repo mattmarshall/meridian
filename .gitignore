@@ -4,4 +4,4 @@ node_modules/
 *.tsbuildinfo
 dist/
 rust/target/
-rust/Cargo.lock
+# Cargo.lock checked in so crate_universe has a stable input.

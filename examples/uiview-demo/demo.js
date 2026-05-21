@@ -1,19 +1,21 @@
 // Meridian web-renderer demo.
 //
-// Loads the wasm core from the locally-built wasm-pack output (run
-// `wasm-pack build rust/uiview --features wasm` first to produce it).
+// Loads the wasm core from the Bazel-built rust_wasm_bindgen output.
+// Build it with `bazel build //rust/uiview:uiview_wasm`; the JS +
+// .wasm artifacts land under bazel-bin/rust/uiview/uiview_wasm/.
 // Mocks the RPC layer with canned JSON responses for the Claims +
 // Review tickets panels, matching what the Rust TUI demo does.
 //
 // To run: any static file server rooted at the meridian repo root
 // works (e.g. `python3 -m http.server` from meridian/), then open
-// http://localhost:8000/examples/uiview-demo/
+// http://localhost:8000/examples/uiview-demo/. The server must follow
+// the `bazel-bin` symlink — Python's http.server does so by default.
 
 import init, {
   renderTable,
   buildPopulateRequest,
   readPath,
-} from '../../rust/uiview/pkg/meridian_uiview.js';
+} from '../../bazel-bin/rust/uiview/uiview_wasm/meridian_uiview.js';
 
 import { renderPanel } from '../../src/uiview/renderer.js';
 

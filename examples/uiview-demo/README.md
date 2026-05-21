@@ -7,19 +7,19 @@ DOM + wasm-bindgen rendering layer.
 
 ## Run it
 
-The wasm bundle isn't checked in (the `rust/uiview/pkg/` directory
-is gitignored by wasm-pack convention). Build it first:
+Build the wasm bundle via Bazel. The artifacts land in
+`bazel-bin/rust/uiview/uiview_wasm/` — no host cargo / wasm-pack
+install needed; the rules pull a pinned wasm-bindgen-cli.
 
 ```bash
-cd ../../rust
-wasm-pack build uiview --features wasm
+bazel build //rust/uiview:uiview_wasm
 ```
 
 Then serve the meridian repo root over a static HTTP server. Any
-static server works; the simplest is Python's:
+static server that follows symlinks works (Python's does by default,
+which lets it traverse the `bazel-bin` symlink):
 
 ```bash
-cd ../..
 python3 -m http.server 8000
 ```
 
