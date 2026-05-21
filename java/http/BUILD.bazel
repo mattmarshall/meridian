@@ -1,0 +1,26 @@
+load("@rules_java//java:java_library.bzl", "java_library")
+
+package(default_visibility = ["//visibility:public"])
+
+# JSON-over-HTTP gateway + static file handler. The gateway sits in
+# front of a meridian.ui.descriptors.RpcRegistry and exposes each
+# registered (service, method) as `POST /rpc/<service>/<method>` with
+# proto3 JSON bodies. Consumers pair it with a StaticFileHandler on
+# the same HttpServer to serve a web app from disk.
+#
+# JDK-only deps; no Envoy, no gRPC-Web framing. Pairs with the wasm
+# uiview renderer in //rust/uiview:uiview_wasm + //src/uiview for the
+# in-browser side.
+java_library(
+    name = "http",
+    srcs = [
+        "JsonRpcGateway.java",
+        "StaticFileHandler.java",
+    ],
+    deps = [
+        "@maven//:com_google_protobuf_protobuf_java",
+        "@maven//:com_google_protobuf_protobuf_java_util",
+        "@maven//:io_grpc_grpc_api",
+        "//java/descriptors",
+    ],
+)
