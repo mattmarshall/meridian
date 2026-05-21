@@ -13,6 +13,8 @@ package(default_visibility = ["//visibility:public"])
 java_library(
     name = "descriptors",
     srcs = [
+        "BundleLoader.java",
+        "BundleWatcher.java",
         "PanelRenderer.java",
         "ProtoPaths.java",
         "RequestBuilder.java",
