@@ -1,0 +1,37 @@
+load("@rules_java//java:java_library.bzl", "java_library")
+
+package(default_visibility = ["//visibility:public"])
+
+# JavaFX renderer for Meridian PanelDescriptors.
+#
+#   JavaFxPanelRenderer — entry point; dispatches TABLE / LRO / ADHOC.
+#   DescribedTableCard  — TablePanel renderer.
+#   DescribedLroCard    — LroPanel renderer (form + LRO drive + optional
+#                         finalize call + result table).
+#   LroCard             — abstract base for hand-coded LRO cards that
+#                         don't fit the generic descriptor (e.g. join
+#                         parallel response arrays). Reserved for hosts
+#                         migrating incrementally; new LRO panels should
+#                         use DescribedLroCard.
+java_library(
+    name = "javafx",
+    srcs = [
+        "DescribedLroCard.java",
+        "DescribedTableCard.java",
+        "JavaFxPanelRenderer.java",
+        "LroCard.java",
+    ],
+    deps = [
+        "@maven//:com_google_protobuf_protobuf_java",
+        "@maven//:io_grpc_grpc_api",
+        "@maven//:io_grpc_grpc_stub",
+        "@maven//:org_openjfx_javafx_base_mac_aarch64",
+        "@maven//:org_openjfx_javafx_controls_mac_aarch64",
+        "@maven//:org_openjfx_javafx_graphics_mac_aarch64",
+        "@googleapis//google/longrunning:longrunning_java_proto",
+        "//proto:longrunning_java_grpc_library",
+        "//proto:uiview_java_proto_library",
+        "//java/descriptors",
+        "//java/ui",
+    ],
+)

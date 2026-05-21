@@ -1,0 +1,28 @@
+load("@rules_java//java:java_library.bzl", "java_library")
+
+package(default_visibility = ["//visibility:public"])
+
+# Platform-neutral helpers consumed by every renderer:
+#   ProtoPaths       — field-path accessor over proto Messages.
+#   RpcRegistry      — service+method dispatch via grpc-java's
+#                      ClientCalls. One register() per service.
+#   RequestBuilder   — assembles request Messages from RpcCall
+#                      FieldBindings + runtime context.
+#   PanelRenderer    — interface every host implements (JavaFxPanelRenderer
+#                      is the first; Lanterna / web etc. land alongside).
+java_library(
+    name = "descriptors",
+    srcs = [
+        "PanelRenderer.java",
+        "ProtoPaths.java",
+        "RequestBuilder.java",
+        "RpcRegistry.java",
+    ],
+    deps = [
+        "@maven//:com_google_protobuf_protobuf_java",
+        "@maven//:io_grpc_grpc_api",
+        "@maven//:io_grpc_grpc_stub",
+        "//proto:uiview_java_proto_library",
+        "//java/ui",
+    ],
+)

@@ -1,0 +1,19 @@
+load("@rules_java//java:java_library.bzl", "java_library")
+
+package(default_visibility = ["//visibility:public"])
+
+# Core Meridian UI interfaces shared across renderers. UiCard is the
+# per-panel contract every renderer's cards implement; UiBusy is the
+# shared async-work counter for the JavaFX renderer (TUI / web get
+# their own implementations).
+java_library(
+    name = "ui",
+    srcs = [
+        "UiBusy.java",
+        "UiCard.java",
+    ],
+    deps = [
+        "@maven//:org_openjfx_javafx_base_mac_aarch64",
+        "@maven//:org_openjfx_javafx_graphics_mac_aarch64",
+    ],
+)
