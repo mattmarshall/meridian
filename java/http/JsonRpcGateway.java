@@ -1,5 +1,11 @@
 package meridian.ui.http;
 
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import com.google.gson.JsonPrimitive;
+import com.google.protobuf.Descriptors.Descriptor;
+import com.google.protobuf.Descriptors.FieldDescriptor;
 import com.google.protobuf.Message;
 import com.google.protobuf.util.JsonFormat;
 import com.sun.net.httpserver.HttpExchange;
@@ -32,20 +38,43 @@ public final class JsonRpcGateway {
 
   private final HttpServer server;
   private final RpcRegistry registry;
-  private final JsonFormat.Parser parser =
-      JsonFormat.parser().ignoringUnknownFields();
-  private final JsonFormat.Printer printer =
-      JsonFormat.printer().preservingProtoFieldNames().omittingInsignificantWhitespace();
+  private final JsonFormat.Parser parser;
+  private final JsonFormat.Printer printer;
 
-  private JsonRpcGateway(HttpServer server, RpcRegistry registry) {
+  private JsonRpcGateway(
+      HttpServer server,
+      RpcRegistry registry,
+      JsonFormat.TypeRegistry typeRegistry) {
     this.server = server;
     this.registry = registry;
+    this.parser = JsonFormat.parser()
+        .usingTypeRegistry(typeRegistry)
+        .ignoringUnknownFields();
+    this.printer = JsonFormat.printer()
+        .usingTypeRegistry(typeRegistry)
+        .preservingProtoFieldNames()
+        .omittingInsignificantWhitespace();
   }
 
   /** Binds on the given port and registers the `/rpc/*` handler. */
   public static JsonRpcGateway start(int port, RpcRegistry registry) throws IOException {
+    return start(port, registry, JsonFormat.TypeRegistry.getEmptyTypeRegistry());
+  }
+
+  /**
+   * Same as {@link #start(int, RpcRegistry)}, plus a TypeRegistry the
+   * JsonFormat parser+printer use to expand `google.protobuf.Any`
+   * fields inline (instead of emitting/parsing raw `value` bytes).
+   * Pass descriptors for every Message that can appear inside an Any
+   * in your service's request/response graph — e.g. for LROs, the
+   * metadata + response types of every registered start RPC.
+   */
+  public static JsonRpcGateway start(
+      int port,
+      RpcRegistry registry,
+      JsonFormat.TypeRegistry typeRegistry) throws IOException {
     HttpServer http = HttpServer.create(new InetSocketAddress(port), 0);
-    JsonRpcGateway gateway = new JsonRpcGateway(http, registry);
+    JsonRpcGateway gateway = new JsonRpcGateway(http, registry, typeRegistry);
     http.createContext("/rpc/", gateway::handleRpc);
     http.start();
     LOG.info("JsonRpcGateway listening on http://localhost:" + http.getAddress().getPort()
@@ -102,6 +131,22 @@ public final class JsonRpcGateway {
       String requestJson = body.length == 0 ? "{}" : new String(body, StandardCharsets.UTF_8);
 
       Message.Builder requestBuilder = resolved.requestPrototype.newBuilderForType();
+      // Browsers building requests through the wasm RequestBuilder
+      // produce well-known types in their "structural" object form
+      // (Duration as `{seconds, nanos}`); JsonFormat expects the
+      // canonical string form. Walk the JSON against the request
+      // descriptor and convert in place before parsing.
+      try {
+        JsonElement parsed = JsonParser.parseString(requestJson);
+        if (parsed.isJsonObject()) {
+          coerceWellKnownTypes(parsed.getAsJsonObject(),
+              requestBuilder.getDescriptorForType());
+          requestJson = parsed.toString();
+        }
+      } catch (RuntimeException e) {
+        sendError(exchange, 400, "request body is not valid JSON: " + e.getMessage());
+        return;
+      }
       try {
         parser.merge(requestJson, requestBuilder);
       } catch (RuntimeException | com.google.protobuf.InvalidProtocolBufferException e) {
@@ -145,5 +190,46 @@ public final class JsonRpcGateway {
 
   private static String escape(String s) {
     return s.replace("\\", "\\\\").replace("\"", "\\\"");
+  }
+
+  // ---------------------------------------------------------------------------
+  // Well-known type coercion for request bodies (browser → proto).
+  // Walks the JsonObject in parallel with the descriptor; for any
+  // field whose target type is one of the supported well-known types
+  // (Duration today), converts the structural object form to the
+  // canonical string form JsonFormat's parser expects.
+  // ---------------------------------------------------------------------------
+
+  private static final String DURATION_TYPE = "google.protobuf.Duration";
+
+  private static void coerceWellKnownTypes(JsonObject obj, Descriptor descriptor) {
+    for (FieldDescriptor field : descriptor.getFields()) {
+      JsonElement el = obj.get(field.getName());
+      if (el == null || el.isJsonNull()) continue;
+      if (field.getJavaType() != FieldDescriptor.JavaType.MESSAGE) continue;
+      Descriptor child = field.getMessageType();
+      if (DURATION_TYPE.equals(child.getFullName()) && el.isJsonObject()) {
+        obj.add(field.getName(), durationObjectToString(el.getAsJsonObject()));
+        continue;
+      }
+      if (field.isRepeated() && el.isJsonArray()) {
+        for (JsonElement item : el.getAsJsonArray()) {
+          if (item.isJsonObject()) coerceWellKnownTypes(item.getAsJsonObject(), child);
+        }
+      } else if (el.isJsonObject()) {
+        coerceWellKnownTypes(el.getAsJsonObject(), child);
+      }
+    }
+  }
+
+  private static JsonElement durationObjectToString(JsonObject duration) {
+    long seconds = duration.has("seconds") && !duration.get("seconds").isJsonNull()
+        ? duration.get("seconds").getAsLong() : 0L;
+    int nanos = duration.has("nanos") && !duration.get("nanos").isJsonNull()
+        ? duration.get("nanos").getAsInt() : 0;
+    String s = nanos == 0
+        ? seconds + "s"
+        : String.format("%d.%09ds", seconds, nanos);
+    return new JsonPrimitive(s);
   }
 }

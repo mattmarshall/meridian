@@ -18,6 +18,10 @@ java_library(
         "StaticFileHandler.java",
     ],
     deps = [
+        # Gson is a transitive dep of protobuf-java-util, but strict
+        # deps requires us to declare it directly when we touch
+        # JsonObject / JsonParser ourselves.
+        "@maven//:com_google_code_gson_gson",
         "@maven//:com_google_protobuf_protobuf_java",
         "@maven//:com_google_protobuf_protobuf_java_util",
         "@maven//:io_grpc_grpc_api",
