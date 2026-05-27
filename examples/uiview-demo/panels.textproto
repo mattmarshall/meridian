@@ -56,3 +56,72 @@ panels {
   title: "SPARQL"
   adhoc { handler_id: "sparql" }
 }
+
+# LlmPromptPanel example — author + fill a templated LLM prompt.
+# Shows the slot/template separation: {{slot}} tokens in the system
+# and user templates resolve from the `slots` block, where each
+# slot reuses a FormField widget for its input collection.
+#
+# v0 is preview-only: the renderer substitutes the filled slots
+# into the templates and shows the rendered prompt. To actually
+# call the API, pair this panel with an LroPanel whose start RPC
+# accepts the rendered prompt as input.
+panels {
+  panel_id: "summarize_source"
+  title: "Summarize source file"
+  llm_prompt {
+    description: "Summarize a single source file for a curator who's never seen it."
+    system_template:
+      "You are a careful technical writer producing two-sentence "
+      "code summaries. You output prose only — no markdown, no "
+      "code fences, no lists."
+    user_template:
+      "Summarize the file `{{file_path}}` (language: {{language}}) "
+      "in exactly two sentences. The file content follows:\n\n"
+      "```\n{{file_content}}\n```\n\n"
+      "Sentence 1: what the file's central type or function is. "
+      "Sentence 2: how it fits into a larger system."
+    slots {
+      name: "file_path"
+      field {
+        field_id: "file_path"
+        label: "File path"
+        text { default_value: "src/lib.rs" }
+      }
+    }
+    slots {
+      name: "language"
+      field {
+        field_id: "language"
+        label: "Language"
+        enum_selection {
+          allowed_values: "rust"
+          allowed_values: "python"
+          allowed_values: "go"
+          allowed_values: "typescript"
+          allowed_values: "java"
+          allowed_values: "cpp"
+          allowed_values: "c"
+          default_value: "rust"
+        }
+      }
+    }
+    slots {
+      name: "file_content"
+      field {
+        field_id: "file_content"
+        label: "File content"
+        description: "Paste the full file contents here."
+        text {}
+      }
+      multi_line: true
+      rows: 20
+    }
+    model_hint {
+      provider: "anthropic"
+      model: "claude-sonnet-4-5"
+      max_tokens: 256
+      temperature: 0.0
+    }
+  }
+}
