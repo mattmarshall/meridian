@@ -1,0 +1,19 @@
+[package]
+name = "meridian-egui-demo"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+description = "Native egui renderer foil: renders a PanelDescriptor by reusing the meridian-uiview core (same as the TUI and wasm web renderers)."
+publish = false
+
+[[bin]]
+name = "egui-demo"
+path = "src/main.rs"
+
+[dependencies]
+meridian-uiview = { path = "../uiview" }
+meridian-tui = { path = "../tui" } # RpcInvoker trait + RpcError
+egui = { workspace = true }
+eframe = { workspace = true }
+serde_json = { workspace = true }

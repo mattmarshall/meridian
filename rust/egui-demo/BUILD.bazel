@@ -1,0 +1,21 @@
+load("@rules_rust//rust:defs.bzl", "rust_binary")
+
+package(default_visibility = ["//visibility:public"])
+
+exports_files(["Cargo.toml"])
+
+# Native egui renderer foil. Run with: bazel run //rust/egui-demo:egui-demo
+# (Cargo also works: cargo run -p meridian-egui-demo)
+rust_binary(
+    name = "egui-demo",
+    srcs = ["src/main.rs"],
+    crate_name = "meridian_egui_demo",
+    edition = "2021",
+    deps = [
+        "//rust/tui",  # RpcInvoker trait + RpcError
+        "//rust/uiview",
+        "@crates//:eframe",
+        "@crates//:egui",
+        "@crates//:serde_json",
+    ],
+)
