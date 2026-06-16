@@ -65,7 +65,7 @@ async function bundleModuleWorker(entryUrl: string): Promise<string> {
   const blobs = new Map<string, string>(); // absolute module URL -> blob URL
   const inflight = new Map<string, Promise<string>>();
 
-  async function build(absUrl: string, stack: string[]): Promise<string> {
+  async function build(absUrl: string, stack: string[], prelude = ''): Promise<string> {
     const done = blobs.get(absUrl);
     if (done) return done;
     if (stack.indexOf(absUrl) !== -1) {
@@ -97,7 +97,9 @@ async function bundleModuleWorker(entryUrl: string): Promise<string> {
         const blob = spec ? mapping.get(spec) : undefined;
         return blob ? full.replace(spec, blob) : full;
       });
-      const url = URL.createObjectURL(new Blob([rewritten], { type: 'text/javascript' }));
+      const url = URL.createObjectURL(
+        new Blob([prelude + rewritten], { type: 'text/javascript' }),
+      );
       blobs.set(absUrl, url);
       return url;
     })();
@@ -106,7 +108,16 @@ async function bundleModuleWorker(entryUrl: string): Promise<string> {
   }
 
   const base = (typeof document !== 'undefined' && document.baseURI) || entryUrl;
-  return build(new URL(entryUrl, base).href, []);
+  const entryHref = new URL(entryUrl, base).href;
+  // The worker runs from a blob: URL, against which root-relative requests like
+  // fetch('/api/…') cannot resolve (a blob: URL is not a valid base). Re-root
+  // the worker's relative fetches against the worker's original URL so its
+  // runtime requests keep resolving to the right origin.
+  const prelude =
+    '(function(){var B=' + JSON.stringify(entryHref) + ';var of=self.fetch;' +
+    'if(of){self.fetch=function(i,o){try{if(typeof i==="string")i=new URL(i,B).href;}catch(e){}' +
+    'return of.call(self,i,o);};}})();\n';
+  return build(entryHref, [], prelude);
 }
 
 // Create a module worker whose bare specifiers resolve via the page import map.
