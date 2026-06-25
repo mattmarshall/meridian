@@ -59,9 +59,11 @@ public struct TablePanelView: View {
     }
 
     private var tableView: some View {
+        // Note: `TableColumn` is qualified to SwiftUI's — our descriptor type is
+        // also named TableColumn (Descriptors.swift) and would otherwise shadow it.
         Table(rows, selection: $selection) {
             TableColumnForEach(Array(table.columns.enumerated()), id: \.element.id) { item in
-                TableColumn(item.element.header) { (row: RenderedRow) in
+                SwiftUI.TableColumn(item.element.header) { (row: RenderedRow) in
                     Text(row.cells.indices.contains(item.offset) ? row.cells[item.offset] : "")
                         .lineLimit(1)
                         .truncationMode(.middle)

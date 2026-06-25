@@ -13,7 +13,7 @@ import MeridianProto
 public enum BundleLoader {
     /// Decode a wire-encoded meridian.ui.v1.PanelBundle.
     public static func decode(_ data: Data) throws -> PanelBundle {
-        let pb = try Meridian_Ui_V1_PanelBundle(serializedBytes: data)
+        let pb = try Meridian_Ui_V1_PanelBundle(serializedData: data)
         return PanelBundle(version: pb.version, panels: pb.panels.map(mapDescriptor))
     }
 
