@@ -22,11 +22,9 @@ jobs:
       - uses: bazel-contrib/setup-bazel@0.10.0
         with:
           bazelisk-cache: true
-          disk-cache: meridian-swift-macos
-          repository-cache: true
-      # --lockfile_mode=off: resolve modules fresh. The committed
-      # MODULE.bazel.lock predates a registry bazel_registry.json change, and
-      # it can't be cleanly regenerated off-CI (the apple_cc extension needs
-      # Xcode). Resolving fresh sidesteps the stale-checksum error; the runner
-      # has Xcode so apple_cc resolves here.
+      # Resolve modules fresh: this branch removes the committed
+      # MODULE.bazel.lock (it predated a registry bazel_registry.json change
+      # and can't be cleanly regenerated off-CI, since the apple_cc extension
+      # needs Xcode). No repository-cache, so the registry file is fetched
+      # clean — no stale-checksum mismatch. The runner has Xcode for apple_cc.
       - run: bazel build --lockfile_mode=off //proto:MeridianProto //swift:MeridianUI
