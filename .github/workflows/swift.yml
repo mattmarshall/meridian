@@ -1,0 +1,27 @@
+name: swift
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: swift-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: build MeridianUI (macOS)
+    # rules_swift needs a full Xcode; GitHub macos-latest runners ship one.
+    # This compiles the swift-protobuf descriptor types + the SwiftUI renderer,
+    # the validation a Command-Line-Tools-only dev box can't do locally.
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: bazel-contrib/setup-bazel@0.10.0
+        with:
+          bazelisk-cache: true
+          disk-cache: meridian-swift-macos
+          repository-cache: true
+      - run: bazel build //proto:MeridianProto //swift:MeridianUI
