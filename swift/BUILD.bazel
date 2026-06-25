@@ -1,0 +1,23 @@
+"""MeridianUI — the SwiftUI renderer for meridian panel descriptors.
+
+The fourth meridian renderer (peer to rust/tui, java/javafx, src/ web). It
+decodes a PanelBundle .binpb (via the swift-protobuf types from
+//proto:MeridianProto) and renders panels as native SwiftUI. Transport is
+host-supplied via the `RpcInvoker` protocol — MeridianUI speaks no gRPC.
+
+Consumed by app hosts as `@meridian//swift:MeridianUI`. Requires a full Xcode
+on the build host (rules_swift).
+"""
+
+load("@rules_swift//swift:swift_library.bzl", "swift_library")
+
+package(default_visibility = ["//visibility:public"])
+
+swift_library(
+    name = "MeridianUI",
+    srcs = glob(["Sources/MeridianUI/**/*.swift"]),
+    module_name = "MeridianUI",
+    # SwiftUI + Foundation are autolinked from the SDK on `import`; only the
+    # generated descriptor types are an explicit dep.
+    deps = ["//proto:MeridianProto"],
+)
