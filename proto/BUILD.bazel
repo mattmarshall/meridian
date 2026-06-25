@@ -74,6 +74,9 @@ java_proto_library(
 # full Xcode on the build host (swiftc).
 swift_proto_library(
     name = "MeridianProto",
+    # Pin the generated Swift module name; otherwise rules_swift derives it from
+    # the label (e.g. proto_MeridianProto) and `import MeridianProto` fails.
+    module_name = "MeridianProto",
     protos = [":uiview_proto"],
 )
 
