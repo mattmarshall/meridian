@@ -60,6 +60,7 @@ public final class DescribedLroCard extends VBox implements UiCard {
   private final LroPanel panel;
   private final RpcRegistry registry;
   private final Message uiIdentity;
+  private final MeridianTheme theme;
   private final OperationsGrpc.OperationsBlockingStub opsStub;
 
   private final Label header = new Label();
@@ -78,7 +79,8 @@ public final class DescribedLroCard extends VBox implements UiCard {
       PanelDescriptor descriptor,
       RpcRegistry registry,
       Message uiIdentity,
-      ManagedChannel channel) {
+      ManagedChannel channel,
+      MeridianTheme theme) {
     if (descriptor.getBodyCase() != PanelDescriptor.BodyCase.LRO) {
       throw new IllegalArgumentException(
           "DescribedLroCard requires an LroPanel body; got " + descriptor.getBodyCase());
@@ -87,11 +89,13 @@ public final class DescribedLroCard extends VBox implements UiCard {
     this.panel = descriptor.getLro();
     this.registry = registry;
     this.uiIdentity = uiIdentity;
+    this.theme = theme;
     this.opsStub = OperationsGrpc.newBlockingStub(channel);
 
     header.setText(descriptor.getTitle());
-    header.setStyle("-fx-font-weight: bold; -fx-font-size: 14px;");
-    meta.setStyle("-fx-text-fill: #555;");
+    header.setStyle(theme.headerStyle());
+    meta.setStyle(theme.metaStyle());
+    setStyle(theme.rootStyle());
 
     runButton.setText(panel.getRunButtonLabel().isEmpty()
         ? "Run" : panel.getRunButtonLabel());

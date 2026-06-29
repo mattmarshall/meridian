@@ -9,6 +9,8 @@ public struct TablePanelView: View {
     @ObservedObject var state: PanelState
     let table: TablePanel
 
+    @Environment(\.meridianTheme) private var theme
+
     @State private var rows: [RenderedRow] = []
     @State private var selection: Int?
     @State private var loading = false
@@ -22,7 +24,7 @@ public struct TablePanelView: View {
     public var body: some View {
         VStack(spacing: 0) {
             if let errorText {
-                banner(errorText, system: "exclamationmark.triangle.fill", tint: .orange)
+                banner(errorText, system: "exclamationmark.triangle.fill", tint: theme.danger)
             }
             content
         }
@@ -77,7 +79,7 @@ public struct TablePanelView: View {
         HStack {
             Text("\(rows.count) \(table.itemNoun)")
                 .font(.caption)
-                .foregroundStyle(.secondary)
+                .foregroundStyle(theme.muted)
             Spacer()
         }
         .padding(.horizontal, 12)

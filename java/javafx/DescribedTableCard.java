@@ -44,6 +44,7 @@ public final class DescribedTableCard extends VBox implements UiCard {
   private final TablePanel table;
   private final RpcRegistry registry;
   private final Message uiIdentity;
+  private final MeridianTheme theme;
 
   private final Label header = new Label();
   private final Label meta = new Label();
@@ -59,7 +60,8 @@ public final class DescribedTableCard extends VBox implements UiCard {
   public DescribedTableCard(
       PanelDescriptor descriptor,
       RpcRegistry registry,
-      Message uiIdentity) {
+      Message uiIdentity,
+      MeridianTheme theme) {
     if (descriptor.getBodyCase() != PanelDescriptor.BodyCase.TABLE) {
       throw new IllegalArgumentException(
           "DescribedTableCard requires a TablePanel body; got " + descriptor.getBodyCase());
@@ -68,10 +70,12 @@ public final class DescribedTableCard extends VBox implements UiCard {
     this.table = descriptor.getTable();
     this.registry = registry;
     this.uiIdentity = uiIdentity;
+    this.theme = theme;
 
     header.setText(descriptor.getTitle());
-    header.setStyle("-fx-font-weight: bold; -fx-font-size: 14px;");
-    meta.setStyle("-fx-text-fill: #555;");
+    header.setStyle(theme.headerStyle());
+    meta.setStyle(theme.metaStyle());
+    setStyle(theme.rootStyle());
 
     buildColumns();
     buildActions();

@@ -5,14 +5,18 @@ runtime.
 
 | Surface | Purpose |
 |---|---|
-| [`proto/uiview.proto`](proto/uiview.proto) | Platform-neutral `PanelDescriptor` contract every renderer consumes. |
+| [`proto/uiview.proto`](proto/uiview.proto) | Platform-neutral `PanelDescriptor` contract every renderer consumes (the **semantics** layer). |
+| [`proto/theme.proto`](proto/theme.proto) + [`theme/`](theme/) | Renderer-agnostic **theme** layer (`meridian.theme.v1`): one skin, every surface. |
 | [`java/`](java/) | JavaFX renderer + descriptor-driven helpers (Pinax desktop UI today). |
 | [`rust/`](rust/) | `ratatui` TUI renderer + a Rust core that, via wasm-bindgen, also backs the TS web renderer. |
+| [`swift/`](swift/) | SwiftUI renderer (`MeridianUI`) for the macOS app — Xcode-gated. |
 | [`src/`](src/) | Lightweight TypeScript web-component toolkit (workers, DOM, proto-JSON) — predates the UI framework but is its rendering substrate. |
 
-The Java / Rust / TS renderers consume the same `PanelDescriptor`
-protos; adding a new platform is "write one renderer over the same
-contract."
+The Java / Rust / TS / Swift renderers consume the same `PanelDescriptor`
+protos and the same `Theme`; adding a new platform is "write one renderer over
+the same contract." See **[`docs/framework.md`](docs/framework.md)** for the
+framework model: the three orthogonal layers (semantics / theme / renderers)
+and widgets-as-plugins.
 
 ## What's in it
 

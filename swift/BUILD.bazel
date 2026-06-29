@@ -17,7 +17,12 @@ swift_library(
     name = "MeridianUI",
     srcs = glob(["Sources/MeridianUI/**/*.swift"]),
     module_name = "MeridianUI",
-    # SwiftUI + Foundation are autolinked from the SDK on `import`; only the
-    # generated descriptor types are an explicit dep.
-    deps = ["//proto:MeridianProto"],
+    # SwiftUI + Foundation are autolinked from the SDK on `import`; the generated
+    # proto types are explicit deps: MeridianProto for the descriptors,
+    # MeridianThemeProto for meridian.theme.v1.Theme (the theme binding in
+    # Theme.swift maps it to SwiftUI Colors + an EnvironmentValues key).
+    deps = [
+        "//proto:MeridianProto",
+        "//proto:MeridianThemeProto",
+    ],
 )

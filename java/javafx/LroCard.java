@@ -28,6 +28,9 @@ import meridian.ui.UiCard;
 // Most LRO panels should use DescribedLroCard via a PanelDescriptor
 // instead; this base is the escape hatch.
 //
+// Constructed with a MeridianTheme (the skin); the header/meta labels and the
+// card background source ALL their look from it — no -fx hex literals here.
+//
 // Subclasses supply:
 //   - panelId()       — stable identifier (matches a PanelDescriptor.panel_id)
 //   - title()         — header
@@ -50,12 +53,15 @@ public abstract class LroCard<M extends Message, R extends Message> extends VBox
   protected final HBox actions = new HBox(8);
 
   private final OperationsGrpc.OperationsBlockingStub opsStub;
+  protected final MeridianTheme theme;
   private String currentResourcePath;
 
-  protected LroCard(ManagedChannel channel) {
+  protected LroCard(ManagedChannel channel, MeridianTheme theme) {
     this.opsStub = OperationsGrpc.newBlockingStub(channel);
-    header.setStyle("-fx-font-weight: bold; -fx-font-size: 14px;");
-    meta.setStyle("-fx-text-fill: #555;");
+    this.theme = theme;
+    header.setStyle(theme.headerStyle());
+    meta.setStyle(theme.metaStyle());
+    setStyle(theme.rootStyle());
     runButton.setText(actionLabel());
     runButton.setOnAction(e -> startRun());
     actions.getChildren().add(runButton);

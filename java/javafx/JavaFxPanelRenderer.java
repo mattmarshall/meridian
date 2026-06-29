@@ -38,11 +38,26 @@ public final class JavaFxPanelRenderer implements PanelRenderer {
   private final Message uiIdentity;
   private final ManagedChannel channel;
   private final Map<String, AdhocFactory> adhocFactories = new HashMap<>();
+  // The active skin. Cards source ALL color/font from it; defaults to the
+  // neutral built-in so the renderer is presentable un-skinned. Hosts that
+  // load a Theme (e.g. @brand's fastverk skin) call withTheme(...).
+  private MeridianTheme theme = MeridianTheme.neutral();
 
   public JavaFxPanelRenderer(RpcRegistry registry, Message uiIdentity, ManagedChannel channel) {
     this.registry = registry;
     this.uiIdentity = uiIdentity;
     this.channel = channel;
+  }
+
+  /** Sets the skin the rendered cards draw their look from. */
+  public JavaFxPanelRenderer withTheme(MeridianTheme theme) {
+    this.theme = theme;
+    return this;
+  }
+
+  /** The active skin (neutral by default). Hosts can use it to style the shell. */
+  public MeridianTheme theme() {
+    return theme;
   }
 
   /** Registers an adhoc factory keyed by handler_id. */
@@ -54,9 +69,9 @@ public final class JavaFxPanelRenderer implements PanelRenderer {
   @Override public UiCard render(PanelDescriptor descriptor) {
     switch (descriptor.getBodyCase()) {
       case TABLE:
-        return new DescribedTableCard(descriptor, registry, uiIdentity);
+        return new DescribedTableCard(descriptor, registry, uiIdentity, theme);
       case LRO:
-        return new DescribedLroCard(descriptor, registry, uiIdentity, channel);
+        return new DescribedLroCard(descriptor, registry, uiIdentity, channel, theme);
       case ADHOC: {
         String id = descriptor.getAdhoc().getHandlerId();
         AdhocFactory f = adhocFactories.get(id);
