@@ -530,6 +530,88 @@
   },
   "selectedYankedVersions": {},
   "moduleExtensions": {
+    "//bazel:protoc_prebuilt.bzl%protoc_prebuilt": {
+      "general": {
+        "bzlTransitiveDigest": "bU/vjos/Tth/teRlnxzLUSiPqXGcLJkZNZFVEvZTk3A=",
+        "usagesDigest": "x5bCxWMPWrw9TKq6y+arvuIMrOIgec751Ct0GpYEqMc=",
+        "recordedFileInputs": {},
+        "recordedDirentsInputs": {},
+        "envVariables": {},
+        "generatedRepoSpecs": {
+          "meridian_protoc": {
+            "repoRuleId": "@@//bazel:protoc_prebuilt.bzl%_meridian_protoc_repo",
+            "attributes": {}
+          }
+        },
+        "recordedRepoMappingEntries": []
+      }
+    },
+    "@@aspect_rules_ts+//ts:extensions.bzl%ext": {
+      "general": {
+        "bzlTransitiveDigest": "b1Ya0x30zyeDS5jfN2bnOMKynAsr1DH7X8uYAMp3xv8=",
+        "usagesDigest": "1iGid+zT5XHz6HMJdvgt3aT6U/Oy1nB5EFYP5qJvOKw=",
+        "recordedFileInputs": {},
+        "recordedDirentsInputs": {},
+        "envVariables": {},
+        "generatedRepoSpecs": {
+          "npm_typescript": {
+            "repoRuleId": "@@aspect_rules_ts+//ts/private:npm_repositories.bzl%http_archive_version",
+            "attributes": {
+              "version": "5.6.3",
+              "integrity": "",
+              "urls": [
+                "https://registry.npmjs.org/typescript/-/typescript-{}.tgz"
+              ]
+            }
+          }
+        },
+        "recordedRepoMappingEntries": [
+          [
+            "aspect_rules_ts+",
+            "aspect_rules_ts",
+            "aspect_rules_ts+"
+          ],
+          [
+            "aspect_rules_ts+",
+            "bazel_tools",
+            "bazel_tools"
+          ]
+        ]
+      }
+    },
+    "@@aspect_tools_telemetry+//:extension.bzl%telemetry": {
+      "general": {
+        "bzlTransitiveDigest": "cl5A2O84vDL6Tt+Qga8FCj1DUDGqn+e7ly5rZ+4xvcc=",
+        "usagesDigest": "SL/Ux0sDsis2z3QhL3migTQfl1xVmfpboobz3DvGBxI=",
+        "recordedFileInputs": {},
+        "recordedDirentsInputs": {},
+        "envVariables": {},
+        "generatedRepoSpecs": {
+          "aspect_tools_telemetry_report": {
+            "repoRuleId": "@@aspect_tools_telemetry+//:extension.bzl%tel_repository",
+            "attributes": {
+              "deps": {
+                "aspect_rules_js": "3.1.2",
+                "aspect_rules_ts": "3.8.9",
+                "aspect_tools_telemetry": "0.3.3"
+              }
+            }
+          }
+        },
+        "recordedRepoMappingEntries": [
+          [
+            "aspect_tools_telemetry+",
+            "bazel_lib",
+            "bazel_lib+"
+          ],
+          [
+            "aspect_tools_telemetry+",
+            "bazel_skylib",
+            "bazel_skylib+"
+          ]
+        ]
+      }
+    },
     "@@rules_kotlin+//src/main/starlark/core/repositories:bzlmod_setup.bzl%rules_kotlin_extensions": {
       "general": {
         "bzlTransitiveDigest": "OlvsB0HsvxbR8ZN+J9Vf00X/+WVz/Y/5Xrq2LgcVfdo=",
@@ -597,7 +679,7 @@
     "@@rules_nodejs+//nodejs:extensions.bzl%node": {
       "general": {
         "bzlTransitiveDigest": "oZFClfRhTTwsYzpxVPkOpOt/r0+OzEfEV37au0jFZ0s=",
-        "usagesDigest": "n9y3IuYom9ujMaO5R7gYgxrIoT0/pccvrNwsnL1NqyE=",
+        "usagesDigest": "/XQT/FG8vp/gsfzAXafqJj35oHnB7ZM5wZdUw46bP4g=",
         "recordedFileInputs": {},
         "recordedDirentsInputs": {},
         "envVariables": {},
@@ -834,7 +916,7 @@
     "@@rules_rust+//crate_universe:extensions.bzl%crate": {
       "general": {
         "bzlTransitiveDigest": "QVeMjnyhLnvezEGE1dsP66SeW7LYNISB0YbxfF17Ubc=",
-        "usagesDigest": "Www1fvWFUHLuNmOJXIH0GNOuw0T9b7W1ijUvvsHtIFM=",
+        "usagesDigest": "8BC7It9iyLhEeCbClALFfK7+zTGjClUNQboR7hd+Vog=",
         "recordedFileInputs": {
           "@@//rust/Cargo.lock": "07838179d5dd271d94a2465ef05f8cb931e7632ef083324d77ce0637c2a87132",
           "@@//rust/Cargo.toml": "973783789eece42bfbca30294973c9c6411294f6c6c56685fedaaf044db48422",
