@@ -118,7 +118,15 @@ proto_library(
         "rpc.proto",
         "table.proto",
     ],
-    data = [":uiview_proto_serde_transform"],
+    # The serde transform (for the Rust/wasm renderer) drags in @crates//:serde,
+    # which crate_universe marks incompatible with iOS — and `data` propagates to
+    # EVERY consumer of this proto, so it would make the Swift binding
+    # (MeridianProto) unibuildable for iOS. Drop it on iOS (which never builds the
+    # Rust renderer); keep it everywhere else so rust_prost_library still finds it.
+    data = select({
+        "@platforms//os:ios": [],
+        "//conditions:default": [":uiview_proto_serde_transform"],
+    }),
     deps = [
         "@googleapis//google/api:field_behavior_proto",
     ],
