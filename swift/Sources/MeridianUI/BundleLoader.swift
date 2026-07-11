@@ -42,6 +42,10 @@ public enum BundleLoader {
             ))
         case let .llmPrompt(m):
             body = .llmPrompt(LlmPromptPanel(userTemplate: m.userTemplate, description: m.description_p))
+        case .gallery:
+            // GalleryPanel (panel.proto gallery = 8) is carried but not yet
+            // rendered natively — placeholder until the gallery view lands.
+            body = .unsupported("GalleryPanel")
         case .none:
             body = .unsupported("empty")
         }

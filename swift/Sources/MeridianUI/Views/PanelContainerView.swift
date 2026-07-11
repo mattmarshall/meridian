@@ -21,7 +21,7 @@ public struct PanelContainerView: View {
             .navigationSplitViewColumnWidth(min: 160, ideal: 180)
         } detail: {
             if let panel = state.activePanel {
-                detail(for: panel)
+                PanelBodyView(state: state, panel: panel)
                     .navigationTitle(panel.title)
             } else {
                 ContentUnavailableView("No panels", systemImage: "rectangle.dashed")
@@ -31,24 +31,5 @@ public struct PanelContainerView: View {
 
     private var selectionBinding: Binding<Int?> {
         Binding(get: { state.active }, set: { if let v = $0 { state.select(v) } })
-    }
-
-    @ViewBuilder
-    private func detail(for panel: PanelDescriptor) -> some View {
-        switch panel.body {
-        case let .table(table):
-            // Identity by panel id so switching panels resets table state.
-            TablePanelView(state: state, table: table).id(panel.panelID)
-        case let .unsupported(label):
-            PlaceholderPanelView(shape: label)
-        case .prompt:
-            PlaceholderPanelView(shape: "PromptPanel")
-        case .lro:
-            PlaceholderPanelView(shape: "LroPanel")
-        case .adhoc:
-            PlaceholderPanelView(shape: "AdhocPanel")
-        case .llmPrompt:
-            PlaceholderPanelView(shape: "LlmPromptPanel")
-        }
     }
 }

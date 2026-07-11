@@ -11,6 +11,13 @@ public struct TablePanelView: View {
 
     @Environment(\.meridianTheme) private var theme
 
+    #if os(iOS)
+    // A multi-column SwiftUI `Table` collapses to a single column at compact
+    // width (iPhone portrait), so fall back to a stacked `List` there. The
+    // horizontalSizeClass key only exists on iOS — hence the #if os guard.
+    @Environment(\.horizontalSizeClass) private var hSize
+    #endif
+
     @State private var rows: [RenderedRow] = []
     @State private var selection: Int?
     @State private var loading = false
@@ -60,7 +67,20 @@ public struct TablePanelView: View {
         }
     }
 
+    @ViewBuilder
     private var tableView: some View {
+        #if os(iOS)
+        if hSize == .compact {
+            compactList
+        } else {
+            wideTable
+        }
+        #else
+        wideTable
+        #endif
+    }
+
+    private var wideTable: some View {
         // Note: `TableColumn` is qualified to SwiftUI's — our descriptor type is
         // also named TableColumn (Descriptors.swift) and would otherwise shadow it.
         Table(rows, selection: $selection) {
@@ -72,6 +92,37 @@ public struct TablePanelView: View {
                 }
                 .width(min: 60, ideal: CGFloat(max(item.element.prefWidth, 6)) * 7)
             }
+        }
+    }
+
+    // Compact (iPhone) fallback: one List row per record, columns stacked as
+    // `header: value` lines. The first column is the emphasized title; empty
+    // cells are omitted. Selection binds to RenderedRow.id (its index), the same
+    // key the wide Table uses, so row actions work identically.
+    private var compactList: some View {
+        List(rows, selection: $selection) { row in
+            VStack(alignment: .leading, spacing: 3) {
+                ForEach(Array(table.columns.enumerated()), id: \.element.id) { index, column in
+                    let cell = row.cells.indices.contains(index) ? row.cells[index] : ""
+                    if index == 0 {
+                        Text(cell.isEmpty ? "—" : cell)
+                            .font(.body)
+                            .lineLimit(1)
+                    } else if !cell.isEmpty {
+                        HStack(spacing: 8) {
+                            Text(column.header)
+                                .font(.caption)
+                                .foregroundStyle(theme.muted)
+                            Spacer(minLength: 8)
+                            Text(cell)
+                                .font(.caption)
+                                .lineLimit(1)
+                                .truncationMode(.middle)
+                        }
+                    }
+                }
+            }
+            .padding(.vertical, 2)
         }
     }
 
