@@ -1,6 +1,6 @@
 module(
     name = "meridian",
-    version = "0.2.5",
+    version = "0.2.6",
     compatibility_level = 1,
 )
 
@@ -9,6 +9,10 @@ bazel_dep(name = "aspect_rules_js", version = "3.1.2")
 bazel_dep(name = "aspect_rules_ts", version = "3.8.9")
 bazel_dep(name = "rules_nodejs", version = "6.7.4")
 bazel_dep(name = "bazel_skylib", version = "1.8.2")
+
+# Direct dep so `@platforms//os:ios` is visible as a select() key in proto/BUILD
+# (drops the Rust serde transform from uiview_proto's data on iOS).
+bazel_dep(name = "platforms", version = "0.0.11")
 
 # Java — JavaFX desktop renderer + shared descriptor-driven helpers.
 # Consumers (Pinax today) get the Java surface via `bazel_dep(name =
